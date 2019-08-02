@@ -52,4 +52,41 @@ func (c *Client) NameShowAsync(name string) FutureNameShowResult {
 // NameShow returns detailed information about a name.
 func (c *Client) NameShow(name string) (*nmcjson.NameShowResult, error) {
 	return c.NameShowAsync(name).Receive()
-} 
+}
+
+// FutureNameScanResult is a future promise to deliver the result
+// of a NameScanAsync RPC invocation (or an applicable error).
+type FutureNameScanResult chan *rpcclient.Response
+
+// Receive waits for the Response promised by the future and returns detailed
+// information about a list of names.
+func (r FutureNameScanResult) Receive() (nmcjson.NameScanResult, error) {
+	res, err := rpcclient.ReceiveFuture(r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal result as a name_scan result object
+	var nameScan nmcjson.NameScanResult
+	err = json.Unmarshal(res, &nameScan)
+	if err != nil {
+		return nil, err
+	}
+
+	return nameScan, nil
+}
+
+// NameScanAsync returns an instance of a type that can be used to get the
+// result of the RPC at some future time by invoking the Receive function on
+// the returned instance.
+//
+// See NameScan for the blocking version and more details.
+func (c *Client) NameScanAsync(start string, count uint32) FutureNameScanResult {
+	cmd := nmcjson.NewNameScanCmd(start, &count, nil)
+	return c.SendCmd(cmd)
+}
+
+// NameScan returns detailed information about a list of names.
+func (c *Client) NameScan(start string, count uint32) (nmcjson.NameScanResult, error) {
+	return c.NameScanAsync(start, count).Receive()
+}
