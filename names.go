@@ -3,14 +3,14 @@
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
 
-package nmcrpcclient
+package ncrpcclient
 
 import (
 	"encoding/json"
 
 	"github.com/btcsuite/btcd/rpcclient"
 
-	"github.com/namecoin/nmcjson"
+	"github.com/namecoin/ncjson"
 )
 
 // *********************
@@ -23,14 +23,14 @@ type FutureNameShowResult chan *rpcclient.Response
 
 // Receive waits for the Response promised by the future and returns detailed
 // information about a name.
-func (r FutureNameShowResult) Receive() (*nmcjson.NameShowResult, error) {
+func (r FutureNameShowResult) Receive() (*ncjson.NameShowResult, error) {
 	res, err := rpcclient.ReceiveFuture(r)
 	if err != nil {
 		return nil, err
 	}
 
 	// Unmarshal result as a name_show result object
-	var nameShow nmcjson.NameShowResult
+	var nameShow ncjson.NameShowResult
 	err = json.Unmarshal(res, &nameShow)
 	if err != nil {
 		return nil, err
@@ -45,12 +45,12 @@ func (r FutureNameShowResult) Receive() (*nmcjson.NameShowResult, error) {
 //
 // See NameShow for the blocking version and more details.
 func (c *Client) NameShowAsync(name string) FutureNameShowResult {
-	cmd := nmcjson.NewNameShowCmd(name, nil)
+	cmd := ncjson.NewNameShowCmd(name, nil)
 	return c.SendCmd(cmd)
 }
 
 // NameShow returns detailed information about a name.
-func (c *Client) NameShow(name string) (*nmcjson.NameShowResult, error) {
+func (c *Client) NameShow(name string) (*ncjson.NameShowResult, error) {
 	return c.NameShowAsync(name).Receive()
 }
 
@@ -60,14 +60,14 @@ type FutureNameScanResult chan *rpcclient.Response
 
 // Receive waits for the Response promised by the future and returns detailed
 // information about a list of names.
-func (r FutureNameScanResult) Receive() (nmcjson.NameScanResult, error) {
+func (r FutureNameScanResult) Receive() (ncjson.NameScanResult, error) {
 	res, err := rpcclient.ReceiveFuture(r)
 	if err != nil {
 		return nil, err
 	}
 
 	// Unmarshal result as a name_scan result object
-	var nameScan nmcjson.NameScanResult
+	var nameScan ncjson.NameScanResult
 	err = json.Unmarshal(res, &nameScan)
 	if err != nil {
 		return nil, err
@@ -82,11 +82,11 @@ func (r FutureNameScanResult) Receive() (nmcjson.NameScanResult, error) {
 //
 // See NameScan for the blocking version and more details.
 func (c *Client) NameScanAsync(start string, count uint32) FutureNameScanResult {
-	cmd := nmcjson.NewNameScanCmd(start, &count, nil)
+	cmd := ncjson.NewNameScanCmd(start, &count, nil)
 	return c.SendCmd(cmd)
 }
 
 // NameScan returns detailed information about a list of names.
-func (c *Client) NameScan(start string, count uint32) (nmcjson.NameScanResult, error) {
+func (c *Client) NameScan(start string, count uint32) (ncjson.NameScanResult, error) {
 	return c.NameScanAsync(start, count).Receive()
 }

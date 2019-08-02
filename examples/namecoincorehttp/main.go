@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/namecoin/nmcrpcclient"
+	"github.com/namecoin/ncrpcclient"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 	}
 	// Notice the notification parameter is nil since notifications are
 	// not supported in HTTP POST mode.
-	client, err := nmcrpcclient.New(connCfg, nil)
+	client, err := ncrpcclient.New(connCfg, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
