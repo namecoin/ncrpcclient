@@ -44,14 +44,14 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 // the returned instance.
 //
 // See NameShow for the blocking version and more details.
-func (c *Client) NameShowAsync(name string) FutureNameShowResult {
-	cmd := ncbtcjson.NewNameShowCmd(name, nil)
+func (c *Client) NameShowAsync(name string, options *ncbtcjson.NameShowOptions) FutureNameShowResult {
+	cmd := ncbtcjson.NewNameShowCmd(name, options)
 	return c.SendCmd(cmd)
 }
 
 // NameShow returns detailed information about a name.
-func (c *Client) NameShow(name string) (*ncbtcjson.NameShowResult, error) {
-	return c.NameShowAsync(name).Receive()
+func (c *Client) NameShow(name string, options *ncbtcjson.NameShowOptions) (*ncbtcjson.NameShowResult, error) {
+	return c.NameShowAsync(name, options).Receive()
 }
 
 // FutureNameScanResult is a future promise to deliver the result
