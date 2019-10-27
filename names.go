@@ -8,7 +8,7 @@ package ncrpcclient
 import (
 	"encoding/json"
 
-	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/namecoin/btcd/rpcclient"
 
 	"github.com/namecoin/ncjson"
 )

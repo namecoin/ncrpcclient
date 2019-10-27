@@ -6,7 +6,7 @@
 package ncrpcclient
 
 import (
-	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/namecoin/btcd/rpcclient"
 )
 
 // Client represents a Namecoin RPC client which allows easy access to the
