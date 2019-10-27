@@ -6,6 +6,7 @@
 package ncrpcclient
 
 import (
+	"encoding/hex"
 	"encoding/json"
 
 	"github.com/namecoin/btcd/rpcclient"
@@ -36,6 +37,23 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 		return nil, err
 	}
 
+	if nameShow.NameEncoding == ncbtcjson.Hex {
+		var nameBytes []byte
+		nameBytes, err = hex.DecodeString(nameShow.Name)
+		if err != nil {
+			return nil, err
+		}
+		nameShow.Name = string(nameBytes)
+	}
+	if nameShow.ValueEncoding == ncbtcjson.Hex {
+		var valueBytes []byte
+		valueBytes, err = hex.DecodeString(nameShow.Value)
+		if err != nil {
+			return nil, err
+		}
+		nameShow.Value = string(valueBytes)
+	}
+
 	return &nameShow, nil
 }
 
@@ -45,6 +63,9 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 //
 // See NameShow for the blocking version and more details.
 func (c *Client) NameShowAsync(name string, options *ncbtcjson.NameShowOptions) FutureNameShowResult {
+	if options != nil && options.NameEncoding == ncbtcjson.Hex {
+		name = hex.EncodeToString([]byte(name))
+	}
 	cmd := ncbtcjson.NewNameShowCmd(name, options)
 	return c.SendCmd(cmd)
 }
