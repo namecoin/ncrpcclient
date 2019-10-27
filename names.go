@@ -6,6 +6,7 @@
 package ncrpcclient
 
 import (
+	"encoding/hex"
 	"encoding/json"
 
 	"github.com/namecoin/btcd/rpcclient"
@@ -36,6 +37,23 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 		return nil, err
 	}
 
+	if nameShow.NameEncoding == ncbtcjson.Hex {
+		var nameBytes []byte
+		nameBytes, err = hex.DecodeString(nameShow.Name)
+		if err != nil {
+			return nil, err
+		}
+		nameShow.Name = string(nameBytes)
+	}
+	if nameShow.ValueEncoding == ncbtcjson.Hex {
+		var valueBytes []byte
+		valueBytes, err = hex.DecodeString(nameShow.Value)
+		if err != nil {
+			return nil, err
+		}
+		nameShow.Value = string(valueBytes)
+	}
+
 	return &nameShow, nil
 }
 
@@ -44,14 +62,17 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 // the returned instance.
 //
 // See NameShow for the blocking version and more details.
-func (c *Client) NameShowAsync(name string) FutureNameShowResult {
-	cmd := ncbtcjson.NewNameShowCmd(name, nil)
+func (c *Client) NameShowAsync(name string, options *ncbtcjson.NameShowOptions) FutureNameShowResult {
+	if options != nil && options.NameEncoding == ncbtcjson.Hex {
+		name = hex.EncodeToString([]byte(name))
+	}
+	cmd := ncbtcjson.NewNameShowCmd(name, options)
 	return c.SendCmd(cmd)
 }
 
 // NameShow returns detailed information about a name.
-func (c *Client) NameShow(name string) (*ncbtcjson.NameShowResult, error) {
-	return c.NameShowAsync(name).Receive()
+func (c *Client) NameShow(name string, options *ncbtcjson.NameShowOptions) (*ncbtcjson.NameShowResult, error) {
+	return c.NameShowAsync(name, options).Receive()
 }
 
 // FutureNameScanResult is a future promise to deliver the result
