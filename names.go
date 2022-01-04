@@ -22,6 +22,32 @@ import (
 // of a NameShowAsync RPC invocation (or an applicable error).
 type FutureNameShowResult chan *rpcclient.Response
 
+// FutureNameListResult is a future promise to deliver the result
+// of a NameListAsync RPC invocation (or an applicable error).
+type FutureNameListResult chan *rpcclient.Response
+
+func decode(nameShow *ncbtcjson.NameShowResult) error {
+	if nameShow.NameEncoding == ncbtcjson.Hex {
+		var nameBytes []byte
+		nameBytes, err := hex.DecodeString(nameShow.Name)
+		if err != nil {
+			return err
+		}
+		nameShow.Name = string(nameBytes)
+	}
+
+	if nameShow.ValueEncoding == ncbtcjson.Hex {
+		var valueBytes []byte
+		valueBytes, err := hex.DecodeString(nameShow.Value)
+		if err != nil {
+			return err
+		}
+		nameShow.Value = string(valueBytes)
+	}
+
+	return nil
+}
+
 // Receive waits for the Response promised by the future and returns detailed
 // information about a name.
 func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
@@ -37,24 +63,37 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 		return nil, err
 	}
 
-	if nameShow.NameEncoding == ncbtcjson.Hex {
-		var nameBytes []byte
-		nameBytes, err = hex.DecodeString(nameShow.Name)
-		if err != nil {
-			return nil, err
-		}
-		nameShow.Name = string(nameBytes)
-	}
-	if nameShow.ValueEncoding == ncbtcjson.Hex {
-		var valueBytes []byte
-		valueBytes, err = hex.DecodeString(nameShow.Value)
-		if err != nil {
-			return nil, err
-		}
-		nameShow.Value = string(valueBytes)
+	err = decode(&nameShow)
+	if err != nil {
+		return nil, err
 	}
 
 	return &nameShow, nil
+}
+
+// Receive waits for the Response promised by the future and returns detailed
+// information about a name.
+func (r FutureNameListResult) Receive() (ncbtcjson.NameListResult, error) {
+	res, err := rpcclient.ReceiveFuture(r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal result as a name_list result object
+	var nameList ncbtcjson.NameListResult
+	err = json.Unmarshal(res, &nameList)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range nameList {
+		err = decode(&nameList[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return nameList, nil
 }
 
 // NameShowAsync returns an instance of a type that can be used to get the
@@ -73,6 +112,19 @@ func (c *Client) NameShowAsync(name string, options *ncbtcjson.NameShowOptions) 
 // NameShow returns detailed information about a name.
 func (c *Client) NameShow(name string, options *ncbtcjson.NameShowOptions) (*ncbtcjson.NameShowResult, error) {
 	return c.NameShowAsync(name, options).Receive()
+}
+
+// NameListAsync returns an instance of a type that can be used to get the
+// result of the RPC at some future time by invoking the Receive function on
+// the returned instance.
+func (c *Client) NameListAsync(name string) FutureNameListResult {
+	cmd := ncbtcjson.NewNameListCmd(name)
+	return c.SendCmd(cmd)
+}
+
+// NameList returns a list of names.
+func (c *Client) NameList(name string) (ncbtcjson.NameListResult, error) {
+	return c.NameListAsync(name).Receive()
 }
 
 // FutureNameScanResult is a future promise to deliver the result
