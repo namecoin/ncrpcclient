@@ -9,7 +9,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/namecoin/btcd/rpcclient"
+	"github.com/btcsuite/btcd/rpcclient"
 
 	"github.com/namecoin/ncbtcjson"
 )
