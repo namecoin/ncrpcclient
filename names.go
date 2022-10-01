@@ -8,8 +8,9 @@ package ncrpcclient
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 
-	"github.com/namecoin/btcd/rpcclient"
+	"github.com/btcsuite/btcd/rpcclient"
 
 	"github.com/namecoin/ncbtcjson"
 )
@@ -27,30 +28,36 @@ type FutureNameShowResult chan *rpcclient.Response
 func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 	res, err := rpcclient.ReceiveFuture(r)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("receive future: %w", err)
 	}
 
 	// Unmarshal result as a name_show result object
 	var nameShow ncbtcjson.NameShowResult
+
 	err = json.Unmarshal(res, &nameShow)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unmarshal result: %w", err)
 	}
 
 	if nameShow.NameEncoding == ncbtcjson.Hex {
 		var nameBytes []byte
+
 		nameBytes, err = hex.DecodeString(nameShow.Name)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("decode hex name: %w", err)
 		}
+
 		nameShow.Name = string(nameBytes)
 	}
+
 	if nameShow.ValueEncoding == ncbtcjson.Hex {
 		var valueBytes []byte
+
 		valueBytes, err = hex.DecodeString(nameShow.Value)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("decode hex value: %w", err)
 		}
+
 		nameShow.Value = string(valueBytes)
 	}
 
@@ -66,7 +73,9 @@ func (c *Client) NameShowAsync(name string, options *ncbtcjson.NameShowOptions) 
 	if options != nil && options.NameEncoding == ncbtcjson.Hex {
 		name = hex.EncodeToString([]byte(name))
 	}
+
 	cmd := ncbtcjson.NewNameShowCmd(name, options)
+
 	return c.SendCmd(cmd)
 }
 
@@ -84,14 +93,15 @@ type FutureNameScanResult chan *rpcclient.Response
 func (r FutureNameScanResult) Receive() (ncbtcjson.NameScanResult, error) {
 	res, err := rpcclient.ReceiveFuture(r)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("receive future: %w", err)
 	}
 
 	// Unmarshal result as a name_scan result object
 	var nameScan ncbtcjson.NameScanResult
+
 	err = json.Unmarshal(res, &nameScan)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unmarshal result: %w", err)
 	}
 
 	return nameScan, nil
@@ -104,6 +114,7 @@ func (r FutureNameScanResult) Receive() (ncbtcjson.NameScanResult, error) {
 // See NameScan for the blocking version and more details.
 func (c *Client) NameScanAsync(start string, count uint32) FutureNameScanResult {
 	cmd := ncbtcjson.NewNameScanCmd(start, &count, nil)
+
 	return c.SendCmd(cmd)
 }
 

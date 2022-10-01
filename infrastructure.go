@@ -6,7 +6,9 @@
 package ncrpcclient
 
 import (
-	"github.com/namecoin/btcd/rpcclient"
+	"fmt"
+
+	"github.com/btcsuite/btcd/rpcclient"
 )
 
 // Client represents a Namecoin RPC client which allows easy access to the
@@ -32,7 +34,7 @@ type Client struct {
 func New(config *rpcclient.ConnConfig, ntfnHandlers *rpcclient.NotificationHandlers) (*Client, error) {
 	btcClient, err := rpcclient.New(config, ntfnHandlers)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create RPC client: %w", err)
 	}
 
 	return &Client{btcClient}, nil
