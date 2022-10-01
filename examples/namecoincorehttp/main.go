@@ -30,7 +30,7 @@ func main() {
 	defer client.Shutdown()
 
 	// Get the current data for the name.
-	nameData, err := client.NameShow("d/domob")
+	nameData, err := client.NameShow("d/domob", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
