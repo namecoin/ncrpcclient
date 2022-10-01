@@ -32,6 +32,7 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 
 	// Unmarshal result as a name_show result object
 	var nameShow ncbtcjson.NameShowResult
+
 	err = json.Unmarshal(res, &nameShow)
 	if err != nil {
 		return nil, err
@@ -39,18 +40,23 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 
 	if nameShow.NameEncoding == ncbtcjson.Hex {
 		var nameBytes []byte
+
 		nameBytes, err = hex.DecodeString(nameShow.Name)
 		if err != nil {
 			return nil, err
 		}
+
 		nameShow.Name = string(nameBytes)
 	}
+
 	if nameShow.ValueEncoding == ncbtcjson.Hex {
 		var valueBytes []byte
+
 		valueBytes, err = hex.DecodeString(nameShow.Value)
 		if err != nil {
 			return nil, err
 		}
+
 		nameShow.Value = string(valueBytes)
 	}
 
@@ -66,7 +72,9 @@ func (c *Client) NameShowAsync(name string, options *ncbtcjson.NameShowOptions) 
 	if options != nil && options.NameEncoding == ncbtcjson.Hex {
 		name = hex.EncodeToString([]byte(name))
 	}
+
 	cmd := ncbtcjson.NewNameShowCmd(name, options)
+
 	return c.SendCmd(cmd)
 }
 
