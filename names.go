@@ -97,6 +97,7 @@ func (r FutureNameScanResult) Receive() (ncbtcjson.NameScanResult, error) {
 
 	// Unmarshal result as a name_scan result object
 	var nameScan ncbtcjson.NameScanResult
+
 	err = json.Unmarshal(res, &nameScan)
 	if err != nil {
 		return nil, err
