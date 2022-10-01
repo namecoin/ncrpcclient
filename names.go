@@ -8,6 +8,7 @@ package ncrpcclient
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 
 	"github.com/btcsuite/btcd/rpcclient"
 
@@ -27,7 +28,7 @@ type FutureNameShowResult chan *rpcclient.Response
 func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 	res, err := rpcclient.ReceiveFuture(r)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("receive future: %w", err)
 	}
 
 	// Unmarshal result as a name_show result object
@@ -35,7 +36,7 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 
 	err = json.Unmarshal(res, &nameShow)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unmarshal result: %w", err)
 	}
 
 	if nameShow.NameEncoding == ncbtcjson.Hex {
@@ -43,7 +44,7 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 
 		nameBytes, err = hex.DecodeString(nameShow.Name)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("decode hex name: %w", err)
 		}
 
 		nameShow.Name = string(nameBytes)
@@ -54,7 +55,7 @@ func (r FutureNameShowResult) Receive() (*ncbtcjson.NameShowResult, error) {
 
 		valueBytes, err = hex.DecodeString(nameShow.Value)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("decode hex value: %w", err)
 		}
 
 		nameShow.Value = string(valueBytes)
@@ -92,7 +93,7 @@ type FutureNameScanResult chan *rpcclient.Response
 func (r FutureNameScanResult) Receive() (ncbtcjson.NameScanResult, error) {
 	res, err := rpcclient.ReceiveFuture(r)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("receive future: %w", err)
 	}
 
 	// Unmarshal result as a name_scan result object
@@ -100,7 +101,7 @@ func (r FutureNameScanResult) Receive() (ncbtcjson.NameScanResult, error) {
 
 	err = json.Unmarshal(res, &nameScan)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unmarshal result: %w", err)
 	}
 
 	return nameScan, nil

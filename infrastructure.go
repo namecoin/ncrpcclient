@@ -6,6 +6,8 @@
 package ncrpcclient
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/rpcclient"
 )
 
@@ -32,7 +34,7 @@ type Client struct {
 func New(config *rpcclient.ConnConfig, ntfnHandlers *rpcclient.NotificationHandlers) (*Client, error) {
 	btcClient, err := rpcclient.New(config, ntfnHandlers)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create RPC client: %w", err)
 	}
 
 	return &Client{btcClient}, nil
