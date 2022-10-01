@@ -95,7 +95,6 @@ task:
     - ShellCheck
     - Unit Tests
     - Cross-Compile
-    - TLS Handshake Tests
   bin_cache:
     folder: "idist"
     fingerprint_script:
