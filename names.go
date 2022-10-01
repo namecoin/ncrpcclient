@@ -112,6 +112,7 @@ func (r FutureNameScanResult) Receive() (ncbtcjson.NameScanResult, error) {
 // See NameScan for the blocking version and more details.
 func (c *Client) NameScanAsync(start string, count uint32) FutureNameScanResult {
 	cmd := ncbtcjson.NewNameScanCmd(start, &count, nil)
+
 	return c.SendCmd(cmd)
 }
 
